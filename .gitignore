@@ -1,0 +1,5 @@
+__pycache__
+*.mp4
+*.pt
+segment.py
+utils_segment.py
