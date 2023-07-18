@@ -1,10 +1,8 @@
-# PER 13 JULI BARU BISA MODE = 0
-
-MODE = 0 # 0 = detector, 1 = segmentation
+MODE = 1 # 0 = detector, 1 = segmentation
 if MODE == 0:
-    WEIGHTS = 'yolov8n.pt'
+    WEIGHTS = 'yolov8s.pt'
 elif MODE == 1:
-    WEIGHTS = 'yolov8n-seg.pt'
+    WEIGHTS = 'yolov8s-seg.pt'
 else:
     raise ValueError("Invalid value for MODE. MODE should be either 0 (detector) or 1 (segmentation).")
 

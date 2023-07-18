@@ -6,6 +6,7 @@ import torch.nn as nn
 
 from config import *
 
+
 class AutoBackend(nn.Module):
 
     def __init__(self, device=torch.device('cpu'), fp16=False, fuse=True):
@@ -67,6 +68,7 @@ class AutoBackend(nn.Module):
          """
         return torch.tensor(x).to(self.device) if isinstance(x, np.ndarray) else x
 
+
 class Ensemble(nn.ModuleList):
     """Ensemble of models."""
 
@@ -77,10 +79,9 @@ class Ensemble(nn.ModuleList):
     def forward(self, x, augment=False, profile=False, visualize=False):
         """Function generates the YOLOv5 network's final layer."""
         y = [module(x, augment, profile, visualize)[0] for module in self]
-        # y = torch.stack(y).max(0)[0]  # max ensemble
-        # y = torch.stack(y).mean(0)  # mean ensemble
         y = torch.cat(y, 2)  # nms ensemble, y shape(B, HW, C)
         return y, None  # inference, train output
+
 
 def attempt_load_weights(weights, device=None, fuse=False):
     """Loads an ensemble of models weights=[a,b,c] or a single model weights=[a] or weights=a."""

@@ -1,11 +1,7 @@
 import cv2
 
-from config import *
+from predictor import BasePredictor
 
-if MODE == 0:
-    from detect import BasePredictor, drawPropertiesResult
-elif MODE == 1:
-    from segment import BasePredictor
 
 video = cv2.VideoCapture('pedes.mp4')
 while True:
@@ -15,10 +11,8 @@ while True:
     else:
         base_predictor = BasePredictor()
         result_detector = base_predictor.stream_inference(frame)
-        for result in result_detector:
-            drawPropertiesResult(result, frame)
 
-        cv2.imshow('RESULT', frame)
+        cv2.imshow('RESULT', result_detector)
         if cv2.waitKey(0) & 0xFF == ord('q'):
             break
 cv2.destroyAllWindows()        
