@@ -25,7 +25,7 @@ class AutoBackend(nn.Module):
             | PyTorch               | *.pt             |
         """
         super().__init__()
-        weights = WEIGHTS
+        weights = weight
         w = str(weights[0] if isinstance(weights, list) else weights)
 
         fp16 = fp16 # FP16 # https://medium.com/@fanzongshaoxing/post-training-quantization-of-tensorflow-model-to-fp16-8d66b9dfa77f

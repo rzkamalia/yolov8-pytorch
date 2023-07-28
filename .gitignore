@@ -2,5 +2,3 @@ __pycache__
 *.mp4
 *.png
 *.pt
-segment.py
-utils_segment.py

@@ -6,7 +6,7 @@ import torch
 import torch.nn.functional as F
 import torchvision
 
-from config import class_dict
+from config import classes_dict
 
 
 class LetterBox:
@@ -14,7 +14,6 @@ class LetterBox:
 
     def __init__(self, new_shape=(640, 640), auto=False, scaleFill=False, scaleup=True, stride=32):
         """Initialize LetterBox object with specific parameters."""
-
         self.new_shape = new_shape
         self.auto = auto
         self.scaleFill = scaleFill
@@ -23,7 +22,6 @@ class LetterBox:
 
     def __call__(self, labels=None, image=None):
         """Return updated labels and image with added border."""
-
         if labels is None:
             labels = {}
         img = labels.get('img') if image is None else image
@@ -69,7 +67,6 @@ class LetterBox:
 
     def _update_labels(self, labels, ratio, padw, padh):
         """Update labels."""
-
         labels['instances'].convert_bbox(format='xyxy')
         labels['instances'].denormalize(*labels['img'].shape[:2][::-1])
         labels['instances'].scale(*ratio)
@@ -211,7 +208,7 @@ def non_max_suppression(
         multi_label=False,
         labels=(),
         max_det=300,
-        nc=len(class_dict),  # number of classes (optional)
+        nc=len(classes_dict),  # number of classes (optional)
         max_nms=30000,
         max_wh=7680):
     """
@@ -372,7 +369,6 @@ def xywh2xyxy(x):
     Returns:
         y (np.ndarray | torch.Tensor): The bounding box coordinates in (x1, y1, x2, y2) format.
     """
-    
     y = x.clone() if isinstance(x, torch.Tensor) else np.copy(x)
     y[..., 0] = x[..., 0] - x[..., 2] / 2  # top left x
     y[..., 1] = x[..., 1] - x[..., 3] / 2  # top left y

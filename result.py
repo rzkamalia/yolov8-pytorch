@@ -5,7 +5,7 @@ from functools import lru_cache
 import numpy as np
 import torch
 
-from config import class_dict
+from config import classes_dict
 from utils import LetterBox, xyxy2xywh, scale_coords, masks2segments
 from plotting import Annotator, colors
 
@@ -82,7 +82,7 @@ class Results:
         self.orig_shape = orig_img.shape[:2]
         self.boxes = Boxes(boxes, self.orig_shape) if boxes is not None else None  # native size boxes
         self.masks = Masks(masks, self.orig_shape) if masks is not None else None  # native size or imgsz masks
-        self.names = class_dict
+        self.names = classes_dict
 
     def update(self, boxes=None, masks=None):
         """Update the boxes and masks attributes of the Results object."""

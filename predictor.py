@@ -11,10 +11,10 @@ from utils import LetterBox, non_max_suppression, scale_boxes, process_mask
 
 if torch.cuda.is_available():
     device_name = 'cuda'
-    print('Application is utilizing GPU (CUDA)...')
+    print('cuda')
 else:
     device_name = 'cpu'
-    print('Application is utilizing CPU...')
+    print('gpu')
 
 # Setup model. Initialize YOLO model with given parameters and set it to evaluation mode.
 device = torch.device(device_name)

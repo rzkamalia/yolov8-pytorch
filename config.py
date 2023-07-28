@@ -1,12 +1,13 @@
-MODE = 1 # 0 = detector, 1 = segmentation
+MODE = 0 # 0 = detector, 1 = segmentation
 if MODE == 0:
-    WEIGHTS = 'yolov8s.pt'
+    weight = 'yolov8s.pt'
 elif MODE == 1:
-    WEIGHTS = 'yolov8s-seg.pt'
+    weight = 'yolov8s-seg.pt'
 else:
     raise ValueError("Invalid value for MODE. MODE should be either 0 (detector) or 1 (segmentation).")
 
-class_dict = {
+source_input = 'pedestrian.mp4'
+classes_dict = {
     0: 'person',
     1: 'bicycle',
     2: 'car',
