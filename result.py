@@ -5,7 +5,6 @@ from functools import lru_cache
 import numpy as np
 import torch
 
-from config import classes_dict
 from utils import LetterBox, xyxy2xywh, scale_coords, masks2segments
 from plotting import Annotator, colors
 
@@ -76,13 +75,13 @@ class Results:
         names (dict): A dictionary of class names.
     """
 
-    def __init__(self, orig_img, boxes=None, masks=None) -> None:
+    def __init__(self, orig_img, names, boxes=None, masks=None) -> None:
         """Initialize the Results class."""
         self.orig_img = orig_img
         self.orig_shape = orig_img.shape[:2]
         self.boxes = Boxes(boxes, self.orig_shape) if boxes is not None else None  # native size boxes
         self.masks = Masks(masks, self.orig_shape) if masks is not None else None  # native size or imgsz masks
-        self.names = classes_dict
+        self.names = names
 
     def update(self, boxes=None, masks=None):
         """Update the boxes and masks attributes of the Results object."""
@@ -91,7 +90,7 @@ class Results:
         if masks is not None:
             self.masks = Masks(masks, self.orig_shape)
 
-    def plot( self, conf=True, img=None, img_gpu=None, labels=True, boxes=True, masks=True):
+    def plot(self, conf=True, img=None, img_gpu=None, labels=True, boxes=True, masks=True):
         """
         Plots the detection results on an input RGB image. Accepts a numpy array (cv2) or a PIL Image.
 

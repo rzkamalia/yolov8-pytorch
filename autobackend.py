@@ -4,7 +4,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 
-from config import *
+from config import weights
 
 
 class AutoBackend(nn.Module):
@@ -25,13 +25,16 @@ class AutoBackend(nn.Module):
             | PyTorch               | *.pt             |
         """
         super().__init__()
-        weights = weight
         w = str(weights[0] if isinstance(weights, list) else weights)
 
-        fp16 = fp16 # FP16 # https://medium.com/@fanzongshaoxing/post-training-quantization-of-tensorflow-model-to-fp16-8d66b9dfa77f
-     
+        cuda = torch.cuda.is_available() and device.type != 'cpu'  # use CUDA
+
+        # PyTorch
         model = attempt_load_weights(weights if isinstance(weights, list) else w, device=device, fuse=fuse)
-        model.half() if fp16 else model.float()
+        stride = max(int(model.stride.max()), 32)  # model stride
+        names = model.module.names if hasattr(model, 'module') else model.names  # get class names
+        model.half() if fp16 else model.float()  # https://medium.com/@fanzongshaoxing/post-training-quantization-of-tensorflow-model-to-fp16-8d66b9dfa77f
+        self.model = model  # explicitly assign for to(), cpu(), cuda(), half()
 
         self.__dict__.update(locals())  # assign all variables to self
 
@@ -76,9 +79,9 @@ class Ensemble(nn.ModuleList):
         """Initialize an ensemble of models."""
         super().__init__()
 
-    def forward(self, x, augment=False, profile=False, visualize=False):
+    def forward(self, x, augment=False, visualize=False):
         """Function generates the YOLOv5 network's final layer."""
-        y = [module(x, augment, profile, visualize)[0] for module in self]
+        y = [module(x, augment, visualize)[0] for module in self]
         y = torch.cat(y, 2)  # nms ensemble, y shape(B, HW, C)
         return y, None  # inference, train output
 
@@ -98,10 +101,3 @@ def attempt_load_weights(weights, device=None, fuse=False):
     # Return model
     if len(ensemble) == 1:
         return ensemble[-1]
-
-    # Return ensemble
-    for k in 'names', 'nc', 'yaml':
-        setattr(ensemble, k, getattr(ensemble[0], k))
-    ensemble.stride = ensemble[torch.argmax(torch.tensor([m.stride.max() for m in ensemble])).int()].stride
-    assert all(ensemble[0].nc == m.nc for m in ensemble), f'Models differ in class counts {[m.nc for m in ensemble]}'
-    return ensemble

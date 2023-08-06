@@ -6,8 +6,6 @@ import torch
 import torch.nn.functional as F
 import torchvision
 
-from config import classes_dict
-
 
 class LetterBox:
     """Resize image and padding for detection, instance segmentation, pose."""
@@ -208,7 +206,7 @@ def non_max_suppression(
         multi_label=False,
         labels=(),
         max_det=300,
-        nc=len(classes_dict),  # number of classes (optional)
+        nc=0,  # number of classes (optional)
         max_nms=30000,
         max_wh=7680):
     """
@@ -231,7 +229,6 @@ def non_max_suppression(
             output by a dataloader, with each label being a tuple of (class_index, x1, y1, x2, y2).
         max_det (int): The maximum number of boxes to keep after NMS.
         nc (int, optional): The number of classes output by the model. Any indices after this will be considered masks.
-        max_time_img (float): The maximum time (seconds) for processing one image.
         max_nms (int): The maximum number of boxes into torchvision.ops.nms().
         max_wh (int): The maximum box width and height in pixels
 

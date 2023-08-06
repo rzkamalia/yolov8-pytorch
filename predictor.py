@@ -3,7 +3,7 @@
 import numpy as np
 import torch
 
-from config import MODE
+from config import MODE, classes_list
 from autobackend import AutoBackend
 from result import Results
 from utils import LetterBox, non_max_suppression, scale_boxes, process_mask
@@ -14,17 +14,16 @@ if torch.cuda.is_available():
     print('cuda')
 else:
     device_name = 'cpu'
-    print('gpu')
+    print('cpu')
 
 # Setup model. Initialize YOLO model with given parameters and set it to evaluation mode.
 device = torch.device(device_name)
 model = AutoBackend(device=device, fp16=False, fuse=True)
 model.eval()
 
-
 class BasePredictor:
 
-    def preprocess(self, im, model, device):
+    def preprocess(self, im, device):
         """Prepares input image before inference.
         Args:
             im (torch.Tensor | List(np.ndarray)): BCHW for tensor, [(HWC) x B] for list.
@@ -53,27 +52,32 @@ class BasePredictor:
 
     def postprocess(self, preds, img, orig_imgs):
         """Postprocesses predictions and returns a list of Results objects."""
-        p = non_max_suppression(preds[0])
+        p = non_max_suppression(preds[0], conf_thres=0.25, iou_thres=0.45, classes=classes_list nc=len(model.names))
         
         proto = preds[1][-1] if len(preds[1]) == 3 else preds[1]    # second output is len 3 if pt, but only 1 if exported
         
-        for i, pred in enumerate(p):
+        for i, pred in enumerate(p):       
             if MODE == 0:
                 pred[:, :4] = scale_boxes(img.shape[2:], pred[:, :4], orig_imgs.shape)
-                results = Results(orig_img=orig_imgs, boxes=pred[:, :6])
+                results = Results(orig_img=orig_imgs, names = model.names, boxes=pred[:, :6])
                 output = results.plot()
 
             elif MODE == 1:
-                masks = process_mask(proto[i], pred[:, 6:], pred[:, :4], img.shape[2:], upsample=True)  # HWC
-                if not isinstance(orig_imgs, torch.Tensor):
-                    pred[:, :4] = scale_boxes(img.shape[2:], pred[:, :4], orig_imgs.shape)
-                results = Results(orig_img=orig_imgs, boxes=pred[:, :6], masks=masks)
-                output = results.plot()
+                if not len(pred):
+                    results = Results(orig_img=orig_imgs, names = model.names, boxes=pred[:, :6])
+                    output = results.plot()
+                    continue
+                else:
+                    masks = process_mask(proto[i], pred[:, 6:], pred[:, :4], img.shape[2:], upsample=True)  # HWC
+                    if not isinstance(orig_imgs, torch.Tensor):
+                        pred[:, :4] = scale_boxes(img.shape[2:], pred[:, :4], orig_imgs.shape)
+                    results = Results(orig_img=orig_imgs, names = model.names, boxes=pred[:, :6], masks=masks)
+                    output = results.plot()
         return output
 
     def stream_inference(self, frame=None):
         """Streams real-time inference on camera feed and saves results to file."""
-        im = self.preprocess(frame, model, device)
+        im = self.preprocess(frame, device)
         with torch.no_grad():
             preds = model(im, augment=False, visualize=False)
         results = self.postprocess(preds, im, frame)
