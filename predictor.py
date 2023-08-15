@@ -52,7 +52,7 @@ class BasePredictor:
 
     def postprocess(self, preds, img, orig_imgs):
         """Postprocesses predictions and returns a list of Results objects."""
-        p = non_max_suppression(preds[0], conf_thres=0.25, iou_thres=0.45, classes=classes_list nc=len(model.names))
+        p = non_max_suppression(preds[0], conf_thres=0.25, iou_thres=0.45, classes=classes_list, nc=len(model.names))
         
         proto = preds[1][-1] if len(preds[1]) == 3 else preds[1]    # second output is len 3 if pt, but only 1 if exported
         
